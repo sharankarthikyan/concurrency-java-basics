@@ -29,5 +29,12 @@ public class Main {
         thread.start();
 
         System.out.println("Main thread would continue here");
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        thread.interrupt();
     }
 }
