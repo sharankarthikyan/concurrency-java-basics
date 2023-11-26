@@ -2,32 +2,32 @@ import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String[] args) {
-        // Custom Thread 1
-        CustomThread customThread = new CustomThread();
-        customThread.start();
+        System.out.println("Main thread running");
 
-        // Custom Thread 2
-        Runnable myRunnable = () -> {
-            for(int i = 0; i < 8; i++) {
-                System.out.print(" 2 ");
+        try {
+            System.out.println("Main thread pauses for 2 seconds");
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        Thread thread = new Thread(() -> {
+            String threadName = Thread.currentThread().getName();
+            System.out.println(threadName + " should take 10 dots to run.");
+            for (int i = 0; i < 10; i++) {
+                System.out.print(". ");
                 try {
-                    TimeUnit.MILLISECONDS.sleep(250);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    System.out.println("\nWhoops!! " + threadName + " interrupted.");
                 }
             }
-        };
-        Thread myThread = new Thread(myRunnable);
-        myThread.start();
+            System.out.println("\n" + threadName + " completed.");
+        });
 
-        // Main Thread
-        for(int i = 0; i < 3; i++) {
-            System.out.print(" 0 ");
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        System.out.println(thread.getName() + " is starting.");
+        thread.start();
+
+        System.out.println("Main thread would continue here");
     }
 }
