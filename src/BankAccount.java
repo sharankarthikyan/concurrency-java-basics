@@ -9,6 +9,7 @@ public class BankAccount {
         return balance;
     }
 
+    // Only one thread can access this method if we add synchronized.
     public synchronized void deposit (double amount) {
         try {
             Thread.sleep(10);
@@ -21,6 +22,7 @@ public class BankAccount {
         System.out.printf("STARTING BALANCE: %.0f, DEPOSIT (%.0f) : NEW BALANCE: %.0f%n", originalBalance, amount, balance);
     }
 
+    // Only one thread can access this method if we add synchronized.
     public synchronized void withdraw (double amount) {
         try {
             Thread.sleep(10);
