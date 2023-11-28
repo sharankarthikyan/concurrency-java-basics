@@ -9,7 +9,7 @@ public class BankAccount {
         return balance;
     }
 
-    public void deposit (double amount) {
+    public synchronized void deposit (double amount) {
         try {
             Thread.sleep(10);
         } catch (InterruptedException e) {
@@ -21,7 +21,7 @@ public class BankAccount {
         System.out.printf("STARTING BALANCE: %.0f, DEPOSIT (%.0f) : NEW BALANCE: %.0f%n", originalBalance, amount, balance);
     }
 
-    public void withdraw (double amount) {
+    public synchronized void withdraw (double amount) {
         try {
             Thread.sleep(10);
         } catch (InterruptedException e) {
