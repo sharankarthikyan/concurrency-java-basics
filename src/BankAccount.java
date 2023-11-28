@@ -12,7 +12,8 @@ public class BankAccount {
     // Only one thread can access this method if we add synchronized.
     public synchronized void deposit (double amount) {
         try {
-            Thread.sleep(10);
+            System.out.println("Deposit - Talking to the teller at the bank...");
+            Thread.sleep(7000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
