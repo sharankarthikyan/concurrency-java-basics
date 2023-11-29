@@ -1,14 +1,19 @@
 public class Main {
     public static void main(String[] args) {
-        BankAccount sharanAccount = new BankAccount(10000);
+        BankAccount sharanAccount = new BankAccount("Sharan", 10000);
 
         Thread thread1 = new Thread(() -> sharanAccount.withdraw(2500));
         Thread thread2 = new Thread(() -> sharanAccount.deposit(5000));
-        Thread thread3 = new Thread(() -> sharanAccount.withdraw(2500));
+        Thread thread3 = new Thread(() -> sharanAccount.setName("Rock"));
         Thread thread4 = new Thread(() -> sharanAccount.withdraw(5000));
 
         thread1.start();
         thread2.start();
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         thread3.start();
         thread4.start();
 
