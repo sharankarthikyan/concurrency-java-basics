@@ -11,9 +11,11 @@ public class BankAccount {
         return name;
     }
 
-    public synchronized void setName(String name) {
-        this.name = name;
-        System.out.println("Updated name = " + this.name);
+    public void setName(String name) {
+        synchronized (this) {
+            this.name = name;
+            System.out.println("Updated name = " + this.name);
+        }
     }
 
     public double getBalance() {
