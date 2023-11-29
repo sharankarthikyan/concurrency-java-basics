@@ -22,7 +22,7 @@ public class BankAccount {
         return balance;
     }
 
-    public synchronized void deposit(double amount) {
+    public void deposit(double amount) {
         try {
             System.out.println("Deposit - Talking to the teller at the bank...");
             Thread.sleep(7000);
@@ -31,11 +31,12 @@ public class BankAccount {
         }
 
         // synchronized the critical section of the code.
-//        synchronized (this) {
-        double originalBalance = balance;
-        balance += amount;
-        System.out.printf("STARTING BALANCE: %.0f, DEPOSIT (%.0f) : NEW BALANCE: %.0f%n", originalBalance, amount, balance);
-//        }
+        Double boxedDouble = this.balance;
+        synchronized (boxedDouble) {
+            double originalBalance = balance;
+            balance += amount;
+            System.out.printf("STARTING BALANCE: %.0f, DEPOSIT (%.0f) : NEW BALANCE: %.0f%n", originalBalance, amount, balance);
+        }
     }
 
     // Only one thread can access this method if we add synchronized.
