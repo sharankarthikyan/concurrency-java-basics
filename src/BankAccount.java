@@ -12,7 +12,7 @@ public class BankAccount {
     }
 
     public void setName(String name) {
-        synchronized (this) {
+        synchronized (this.name) {
             this.name = name;
             System.out.println("Updated name = " + this.name);
         }
