@@ -2,6 +2,9 @@ public class BankAccount {
     private String name;
     private double balance;
 
+    private final Object lockName = new Object();
+    private final Object lockBalance = new Object();
+
     public BankAccount(String name, double balance) {
         this.name = name;
         this.balance = balance;
@@ -12,7 +15,7 @@ public class BankAccount {
     }
 
     public void setName(String name) {
-        synchronized (this.name) {
+        synchronized (lockName) {
             this.name = name;
             System.out.println("Updated name = " + this.name);
         }
@@ -32,10 +35,12 @@ public class BankAccount {
 
         // synchronized the critical section of the code.
         Double boxedDouble = this.balance;
-        synchronized (boxedDouble) {
+        synchronized (lockBalance) {
             double originalBalance = balance;
             balance += amount;
             System.out.printf("STARTING BALANCE: %.0f, DEPOSIT (%.0f) : NEW BALANCE: %.0f%n", originalBalance, amount, balance);
+            // Reentrant synchronization - if a thread already holds a lock, it can acquire the same lock again without being blocked.
+            addPromoDollars(amount);
         }
     }
 
@@ -54,6 +59,14 @@ public class BankAccount {
         } else {
             System.out.printf("STARTING BALANCE: %.0f, WITHDRAWAL (%.0f) : INSUFFICIENT FUNDS", originalBalance, amount);
         }
+    }
 
+    private void addPromoDollars(double amount) {
+        if(amount >= 5000) {
+            synchronized (lockBalance) {
+                System.out.println("Congratulations, you earned a promotional deposit.");
+                balance += 25;
+            }
+        }
     }
 }
