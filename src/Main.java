@@ -1,4 +1,5 @@
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.*;
 
 class MessageRepository {
@@ -33,24 +34,28 @@ class MessageRepository {
 
     // To write a message to the repository
     public void write(String message) {
-        if(lock.tryLock()) {
-            try {
-                while (hasMessage) {
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt(); // Preserve the interrupted status
-                        throw new RuntimeException("Error - waiting to write a message", e);
+        try {
+            if(lock.tryLock(1, TimeUnit.SECONDS)) {
+                try {
+                    while (hasMessage) {
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt(); // Preserve the interrupted status
+                            throw new RuntimeException("Error - waiting to write a message", e);
+                        }
                     }
+                    this.hasMessage = true;
+                    this.message = message;
+                } finally {
+                    lock.unlock();
                 }
-                this.hasMessage = true;
-                this.message = message;
-            } finally {
-                lock.unlock();
+            } else {
+                System.out.println("*** Write Blocked ***");
+                this.hasMessage = true; // It indicates that the current thread is not actively writing a message. To maintain consistency.
             }
-        } else {
-            System.out.println("*** Write Blocked ***");
-            this.hasMessage = true; // It indicates that the current thread is not actively writing a message. To maintain consistency.
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }
