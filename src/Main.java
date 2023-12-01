@@ -9,37 +9,49 @@ class MessageRepository {
 
     // To read a message from the repository
     public String read() {
-        lock.lock();
-        try {
-            while (!hasMessage) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    // Handle the InterruptedException appropriately
-                    Thread.currentThread().interrupt(); // Preserve the interrupted status
-                    throw new RuntimeException("Error - waiting for a message", e);
+        if(lock.tryLock()) {
+            try {
+                while (!hasMessage) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        // Handle the InterruptedException appropriately
+                        Thread.currentThread().interrupt(); // Preserve the interrupted status
+                        throw new RuntimeException("Error - waiting for a message", e);
+                    }
                 }
+                this.hasMessage = false;
+            } finally {
+                lock.unlock();
             }
+        } else {
+            System.out.println("*** Read Blocked ***");
             this.hasMessage = false;
-        } finally {
-            lock.unlock();
         }
         return message;
     }
 
     // To write a message to the repository
-    public synchronized void write(String message) {
-        while (hasMessage) {
+    public void write(String message) {
+        if(lock.tryLock()) {
             try {
-                wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // Preserve the interrupted status
-                throw new RuntimeException("Error - waiting to write a message", e);
+                while (hasMessage) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt(); // Preserve the interrupted status
+                        throw new RuntimeException("Error - waiting to write a message", e);
+                    }
+                }
+                this.hasMessage = true;
+                this.message = message;
+            } finally {
+                lock.unlock();
             }
+        } else {
+            System.out.println("*** Write Blocked ***");
+            this.hasMessage = true;
         }
-        this.hasMessage = true;
-        this.message = message;
-        notifyAll();
     }
 }
 
