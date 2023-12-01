@@ -1,22 +1,29 @@
 import java.util.Random;
+import java.util.concurrent.locks.*;
 
 class MessageRepository {
     private String message;
     private boolean hasMessage = false;
 
+    private final Lock lock  = new ReentrantLock();
+
     // To read a message from the repository
-    public synchronized String read() {
-        while (!hasMessage) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                // Handle the InterruptedException appropriately
-                Thread.currentThread().interrupt(); // Preserve the interrupted status
-                throw new RuntimeException("Error - waiting for a message", e);
+    public String read() {
+        lock.lock();
+        try {
+            while (!hasMessage) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    // Handle the InterruptedException appropriately
+                    Thread.currentThread().interrupt(); // Preserve the interrupted status
+                    throw new RuntimeException("Error - waiting for a message", e);
+                }
             }
+            this.hasMessage = false;
+        } finally {
+            lock.unlock();
         }
-        this.hasMessage = false;
-        notifyAll();
         return message;
     }
 
@@ -99,5 +106,21 @@ public class Main {
 
         consumerThread.start();
         producerThread.start();
+
+        producerThread.setUncaughtExceptionHandler((thread, ex)-> {
+            System.out.println("Producer had exception: " + ex);
+            if(consumerThread.isAlive()) {
+                System.out.println("Going to interrupt the consumer.");
+                consumerThread.interrupt();
+            }
+        });
+
+        consumerThread.setUncaughtExceptionHandler((thread, ex)-> {
+            System.out.println("Consumer had exception: " + ex);
+            if(producerThread.isAlive()) {
+                System.out.println("Going to interrupt the producer.");
+                producerThread.interrupt();
+            }
+        });
     }
 }
