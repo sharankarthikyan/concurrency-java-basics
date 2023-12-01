@@ -26,7 +26,7 @@ class MessageRepository {
             }
         } else {
             System.out.println("*** Read Blocked ***");
-            this.hasMessage = false;
+            this.hasMessage = false; // It indicates that the current thread is not actively reading a message. To maintain consistency.
         }
         return message;
     }
@@ -50,7 +50,7 @@ class MessageRepository {
             }
         } else {
             System.out.println("*** Write Blocked ***");
-            this.hasMessage = true;
+            this.hasMessage = true; // It indicates that the current thread is not actively writing a message. To maintain consistency.
         }
     }
 }
