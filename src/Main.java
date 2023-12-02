@@ -23,6 +23,14 @@ public class Main {
         ExecutorService blueExecutor = Executors.newSingleThreadExecutor(new ColorThreadFactory(ThreadColor.ANSI_BLUE));
         blueExecutor.execute(Main::countDown);
         blueExecutor.shutdown();
+
+        ExecutorService yellowExecutor = Executors.newSingleThreadExecutor(new ColorThreadFactory(ThreadColor.ANSI_YELLOW));
+        yellowExecutor.execute(Main::countDown);
+        yellowExecutor.shutdown();
+
+        ExecutorService redExecutor = Executors.newSingleThreadExecutor(new ColorThreadFactory(ThreadColor.ANSI_RED));
+        redExecutor.execute(Main::countDown);
+        redExecutor.shutdown();
     }
 
     public static void notmain(String[] args) {
