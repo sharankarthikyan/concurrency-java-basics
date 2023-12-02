@@ -1,6 +1,8 @@
+import java.sql.Time;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 class ColorThreadFactory implements ThreadFactory {
 
@@ -24,13 +26,42 @@ public class Main {
         blueExecutor.execute(Main::countDown);
         blueExecutor.shutdown();
 
-        ExecutorService yellowExecutor = Executors.newSingleThreadExecutor(new ColorThreadFactory(ThreadColor.ANSI_YELLOW));
-        yellowExecutor.execute(Main::countDown);
-        yellowExecutor.shutdown();
+        boolean isDone = false;
+        try {
+            isDone = blueExecutor.awaitTermination(500, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
-        ExecutorService redExecutor = Executors.newSingleThreadExecutor(new ColorThreadFactory(ThreadColor.ANSI_RED));
-        redExecutor.execute(Main::countDown);
-        redExecutor.shutdown();
+        if(isDone) {
+            System.out.println("Blue is Finished!!, starting yellow.");
+            ExecutorService yellowExecutor = Executors.newSingleThreadExecutor(new ColorThreadFactory(ThreadColor.ANSI_YELLOW));
+            yellowExecutor.execute(Main::countDown);
+            yellowExecutor.shutdown();
+
+            try {
+                isDone = yellowExecutor.awaitTermination(500, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            if(isDone) {
+                System.out.println("Yellow is finished!!, starting red.");
+                ExecutorService redExecutor = Executors.newSingleThreadExecutor(new ColorThreadFactory(ThreadColor.ANSI_RED));
+                redExecutor.execute(Main::countDown);
+                redExecutor.shutdown();
+
+                try {
+                    isDone = redExecutor.awaitTermination(500, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+                if(isDone) {
+                    System.out.println("All processes completed!!");
+                }
+            }
+        }
     }
 
     public static void notmain(String[] args) {
