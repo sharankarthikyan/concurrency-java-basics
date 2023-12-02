@@ -7,21 +7,43 @@ import java.util.concurrent.TimeUnit;
 class ColorThreadFactory implements ThreadFactory {
 
     private String threadName;
+    private int colorValue = 1;
 
     public ColorThreadFactory(ThreadColor color) {
         this.threadName = color.name();
     }
 
+    public ColorThreadFactory() {
+    }
+
     @Override
     public Thread newThread(Runnable r) {
         Thread thread = new Thread(r);
-        thread.setName(threadName);
+        String name = threadName;
+        if(name == null) {
+            name = ThreadColor.values()[colorValue].name();
+        }
+        if(++colorValue > (ThreadColor.values().length - 1)) {
+            colorValue = 1;
+        }
+        thread.setName(name);
         return thread;
     }
 }
 
 public class Main {
+
     public static void main(String[] args) {
+        int COUNT = 4; // change this number to create multiple threads
+        ExecutorService multiExecutor = Executors.newFixedThreadPool(COUNT, new ColorThreadFactory());
+
+        for (int i = 0; i < COUNT; i++) {
+            multiExecutor.execute(Main::countDown);
+        }
+        multiExecutor.shutdown();
+    }
+
+    public static void singlemain(String[] args) {
         ExecutorService blueExecutor = Executors.newSingleThreadExecutor(new ColorThreadFactory(ThreadColor.ANSI_BLUE));
         blueExecutor.execute(Main::countDown);
         blueExecutor.shutdown();
