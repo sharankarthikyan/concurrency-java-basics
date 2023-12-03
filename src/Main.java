@@ -1,8 +1,5 @@
 import java.sql.Time;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 class ColorThreadFactory implements ThreadFactory {
 
@@ -34,6 +31,25 @@ class ColorThreadFactory implements ThreadFactory {
 public class Main {
 
     public static void main(String[] args) {
+        ExecutorService multiExecutor = Executors.newCachedThreadPool();
+        try {
+            Future<Integer> redValue = multiExecutor.submit(()->Main.sum(1, 10, 1, "red"));
+            Future<Integer> blueValue = multiExecutor.submit(()->Main.sum(10, 100, 10, "blue"));
+            Future<Integer> greenValue = multiExecutor.submit(()->Main.sum(2, 20, 2, "green"));
+
+            try {
+                System.out.println(redValue.get(500, TimeUnit.MILLISECONDS));
+                System.out.println(blueValue.get(500, TimeUnit.MILLISECONDS));
+                System.out.println(greenValue.get(500, TimeUnit.MILLISECONDS));
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                throw new RuntimeException(e);
+            }
+        } finally {
+            multiExecutor.shutdown();
+        }
+    }
+
+    public static void fixedmain(String[] args) {
         int COUNT = 4; // change this number to create multiple threads
         ExecutorService multiExecutor = Executors.newFixedThreadPool(COUNT, new ColorThreadFactory());
 
@@ -128,5 +144,23 @@ public class Main {
             System.out.println(color + " " +
                     threadName.replace("ANSI_", "") + " " + i);
         }
+    }
+
+    public static int sum(int start, int end, int delta, String colorString) {
+        ThreadColor threadColor = ThreadColor.ANSI_RESET;
+        try {
+            threadColor = ThreadColor.valueOf("ANSI_" + colorString.toUpperCase());
+        } catch (IllegalArgumentException e) {
+
+        }
+
+        String color = threadColor.color();
+        int sum = 0;
+        for (int i = start; i < end; i += delta) {
+            sum += i;
+        }
+        System.out.println(color + Thread.currentThread().getName() + ", " + colorString + " " + sum);
+
+        return sum;
     }
 }
